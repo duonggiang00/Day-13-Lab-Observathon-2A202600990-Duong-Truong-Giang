@@ -1,12 +1,116 @@
 {
-  "team": "TODO-team-name",
+  "team": "hoangbaclui",
   "schema_version": 1,
   "findings": [
     {
+      "fault_class": "error_spike",
+      "evidence": {
+        "metric": "error_rate",
+        "observed": "Some tool calls fail intermittently with 4xx/5xx",
+        "trace_ids": []
+      },
+      "root_cause": "API unreliability and missing retry mechanism.",
+      "suggested_fix": "Enable retry and backoff in config.json."
+    },
+    {
       "fault_class": "latency_spike",
-      "evidence": {"metric": "latency_p95_ms", "observed": "TODO from your telemetry", "trace_ids": []},
-      "root_cause": "TODO: what config knob or behavior causes it?",
-      "suggested_fix": "TODO: config change and/or wrapper mitigation"
+      "evidence": {
+        "metric": "p99_latency",
+        "observed": "Long-tail slow requests",
+        "trace_ids": []
+      },
+      "root_cause": "Repeated processing of the same inputs.",
+      "suggested_fix": "Enable caching in config.json and implement thread-safe cache in wrapper."
+    },
+    {
+      "fault_class": "cost_blowup",
+      "evidence": {
+        "metric": "token_usage",
+        "observed": "Tokens far above the task requirement",
+        "trace_ids": []
+      },
+      "root_cause": "Self consistency > 1 and large context size combined with long prompts.",
+      "suggested_fix": "Set self_consistency: 1, context_size: 1, and max_steps: 4."
+    },
+    {
+      "fault_class": "quality_drift",
+      "evidence": {
+        "metric": "drift_score",
+        "observed": "Answers worsen in later turns due to private coupon corruption",
+        "trace_ids": []
+      },
+      "root_cause": "Tools return invalid coupon data in later turns.",
+      "suggested_fix": "Hardcode coupon invariants in the system prompt."
+    },
+    {
+      "fault_class": "infinite_loop",
+      "evidence": {
+        "metric": "repeated_actions",
+        "observed": "Agent repeatedly calls same tools until max_steps",
+        "trace_ids": []
+      },
+      "root_cause": "Agent confusion with missing extraction rules.",
+      "suggested_fix": "Add 'call each max once' to prompt and set max_steps: 4."
+    },
+    {
+      "fault_class": "tool_failure",
+      "evidence": {
+        "metric": "tool_error_rate",
+        "observed": "Diacritic city always fails",
+        "trace_ids": []
+      },
+      "root_cause": "Tool data contradicts reality and unicode mismatch.",
+      "suggested_fix": "Set normalize_unicode: true and clear catalog_override."
+    },
+    {
+      "fault_class": "pii_leak",
+      "evidence": {
+        "metric": "pii_hits_in_answer",
+        "observed": "Agent repeats raw email/phone",
+        "trace_ids": []
+      },
+      "root_cause": "Prompt implicitly repeats order text.",
+      "suggested_fix": "Add explicit 'No PII: never repeat email or phone' rule to prompt."
+    },
+    {
+      "fault_class": "fabrication",
+      "evidence": {
+        "metric": "hallucination_rate",
+        "observed": "Agent invents a total for out-of-stock items",
+        "trace_ids": []
+      },
+      "root_cause": "System prompt encourages fabricating confident totals.",
+      "suggested_fix": "Rewrite prompt to mandate grounding: REFUSE out-of-stock or unknown items."
+    },
+    {
+      "fault_class": "arithmetic_error",
+      "evidence": {
+        "metric": "math_error_rate",
+        "observed": "Totals wrong / discount applied backwards",
+        "trace_ids": []
+      },
+      "root_cause": "LLM estimating arithmetic due to lack of explicit formulas.",
+      "suggested_fix": "Add explicit formulas (// 100) and verify step to prompt."
+    },
+    {
+      "fault_class": "tool_overuse",
+      "evidence": {
+        "metric": "tools_used",
+        "observed": "More tool calls than needed",
+        "trace_ids": []
+      },
+      "root_cause": "tool_budget is unlimited and prompt doesn't restrict.",
+      "suggested_fix": "Set tool_budget: 4 and prompt rule 'each tool at most once'."
+    },
+    {
+      "fault_class": "prompt_injection",
+      "evidence": {
+        "metric": "injection_success_rate",
+        "observed": "Agent obeys fake instructions hidden in GHI CHÚ",
+        "trace_ids": []
+      },
+      "root_cause": "Agent does not separate system instructions from user data.",
+      "suggested_fix": "Add defense rule in prompt to treat notes as pure data."
     }
   ]
 }
